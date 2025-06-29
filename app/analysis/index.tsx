@@ -18,6 +18,7 @@ export default function AnalysisResultScreen() {
     };
   
     return (
+      
       <ScrollView className="flex-1 p-4 bg-gray-50">
         <ResultSummary disease={disease} confidence={confidence} pest={pest} />
         <Recommendations
@@ -27,5 +28,6 @@ export default function AnalysisResultScreen() {
         />
         <ResultActions onSave={handleSaveToHistory} />
       </ScrollView>
+      
     );
   }

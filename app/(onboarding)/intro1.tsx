@@ -1,11 +1,12 @@
-import { router } from 'expo-router';
-import { Button, Text, View } from 'react-native';
+import OnboardingScreen from '@/components/onboarding/OnboardingScreen';
 
 export default function Intro1() {
   return (
-    <View className="flex-1 justify-center items-center">
-      <Text className="text-xl">Welcome to AgriCare AI!</Text>
-      <Button title="Next" onPress={() => router.push('/(onboarding)/intro2')} />
-    </View>
+    <OnboardingScreen
+      title="Scan Your Crops Easily"
+      description="Use your camera or gallery to detect crop diseases in seconds using AI."
+      image={require('../../assets/images/scan.png')}
+      nextScreen="/(onboarding)/intro2"
+    />
   );
 }

@@ -1,11 +1,12 @@
-import { router } from 'expo-router';
-import { Button, Text, View } from 'react-native';
+import OnboardingScreen from "@/components/onboarding/OnboardingScreen";
 
 export default function Intro2() {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-xl">Learn to scan crops efficiently</Text>
-        <Button title="Next" onPress={() => router.push('/(onboarding)/intro3')} />
-      </View>
-    );
-  }
+  return (
+    <OnboardingScreen
+      title="Works Even When Offline"
+      description="Diagnose common crop diseases offline and sync results when you're online again."
+      image={require('../../assets/images/offline.png')}
+      nextScreen="/(onboarding)/intro3"
+    />
+  );
+}

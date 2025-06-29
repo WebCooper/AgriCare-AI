@@ -11,7 +11,7 @@ const ActionButton = ({ title, screen }: { title: string; screen: string }) => {
         router.push("/(tabs)/history");
         break;
       case "analysis":
-        router.push("/analysis/analysis");
+        router.push("/analysis");
         break;
       case "chatbot":
         router.push("/(tabs)/chatbot");

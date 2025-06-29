@@ -1,11 +1,12 @@
-import { router } from 'expo-router';
-import { Button, Text, View } from 'react-native';
+import OnboardingScreen from "@/components/onboarding/OnboardingScreen";
 
 export default function Intro3() {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-xl">We respect your privacy and data</Text>
-        <Button title="Get Started" onPress={() => router.push('/(auth)/register')} />
-      </View>
-    );
-  }
+  return (
+    <OnboardingScreen
+      title="We Respect Your Privacy"
+      description="Your crop data is secure. You control what to share or keep private."
+      image={require('../../assets/images/privacy.png')}
+      isLast
+    />
+  );
+}
