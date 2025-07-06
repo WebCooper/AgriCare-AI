@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Alembic (safe to keep these in Git)
+# Don't ignore alembic.ini or versions/
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
