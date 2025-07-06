@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from app.auth import router as auth_router
 from app.core.config import get_settings
+from app.ml import router as ml_router
 
 settings = get_settings()
 
@@ -28,3 +29,5 @@ async def health_check():
     return {"status": "healthy", "message": "API is operational"}
 
 app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
+app.include_router(ml_router.router, prefix="/ml", tags=["ML"])
+
