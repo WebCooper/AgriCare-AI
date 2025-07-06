@@ -1,13 +1,30 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from app.auth import router as auth_router
+from app.core.config import get_settings
 
-# temporary import for creating tables
-from app.db.database import Base, engine
-from app.db.models import User
+settings = get_settings()
 
-# create tables (first time only)
-Base.metadata.create_all(bind=engine)
+app = FastAPI(
+    title="AgriCare AI API",
+    description="Backend API for AgriCare AI mobile application",
+    version="1.0.0"
+)
 
-app = FastAPI()
+# Global exception handler
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+@app.get("/")
+async def root():
+    return {"message": "AgriCare AI API is running"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "message": "API is operational"}
 
 app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
