@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -14,6 +14,8 @@ class User(Base):
     
     # Relationship to refresh tokens
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    # Relationship to conversations
+    conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
@@ -26,3 +28,29 @@ class RefreshToken(Base):
     
     # Relationship to user
     user = relationship("User", back_populates="refresh_tokens")
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    conversation_type = Column(String, nullable=False)  # "general" or "prediction"
+    crop = Column(String, nullable=True)  # For prediction conversations
+    disease = Column(String, nullable=True)  # For prediction conversations
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship to user
+    user = relationship("User", back_populates="conversations")
+    # Relationship to messages
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+
+class Message(Base):
+    __tablename__ = "messages"
+    id = Column(Integer, primary_key=True, index=True)
+    conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
+    role = Column(String, nullable=False)  # "user" or "assistant"
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationship to conversation
+    conversation = relationship("Conversation", back_populates="messages")
