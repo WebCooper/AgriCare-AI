@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # Mobile app specific settings
     MAX_REFRESH_TOKENS_PER_USER: int = 5  # Limit active refresh tokens per user
 
+    GENAI_API_KEY: str
+    
     class Config:
         env_file = ".env"
 
