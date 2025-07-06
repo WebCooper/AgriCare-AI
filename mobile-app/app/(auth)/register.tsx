@@ -1,4 +1,5 @@
 import UserTypeSelector from '@/components/auth/UserTypeSelector';
+import { auth } from '@/config/api';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -10,21 +11,38 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [mobile, setMobile] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('farmer');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSendOtp = () => {
-    setOtpSent(true);
-  };
+  const handleRegister = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
 
-  const handleVerifyOtp = () => {
-    // Save user type and navigate
+    try {
+      setLoading(true);
+      await auth.register(email, password, userType);
+
+      Alert.alert('Success', 'Registration successful!', [
+        {
+          text: 'OK',
+          onPress: () => router.push('/(auth)/login'),
+        },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,37 +61,39 @@ export default function RegisterScreen() {
           <Text className="text-3xl font-bold mb-6 text-center">📝 Create Your Account</Text>
 
           <View className="w-full">
-            <Text className="mb-1 font-semibold text-base">📱 Mobile Number</Text>
+            <Text className="mb-1 font-semibold text-base">📧 Email</Text>
             <TextInput
               className="border bg-white rounded-xl px-4 py-3 mb-4 text-base"
-              placeholder="07XXXXXXXX"
-              keyboardType="phone-pad"
-              value={mobile}
-              onChangeText={setMobile}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
+
+            <Text className="mb-1 font-semibold text-base">🔒 Password</Text>
+            <TextInput
+              className="border bg-white rounded-xl px-4 py-3 mb-4 text-base"
+              placeholder="Enter your password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
             />
 
             <UserTypeSelector selected={userType} onChange={setUserType} />
 
-            {otpSent && (
-              <>
-                <Text className="mb-1 font-semibold text-base mt-4">🔑 Enter OTP</Text>
-                <TextInput
-                  className="border bg-white rounded-xl px-4 py-3 mb-4 text-base"
-                  placeholder="123456"
-                  keyboardType="number-pad"
-                  value={otp}
-                  onChangeText={setOtp}
-                />
-              </>
-            )}
-
             <TouchableOpacity
-              className="bg-green-600 py-4 rounded-xl mb-4"
-              onPress={otpSent ? handleVerifyOtp : handleSendOtp}
+              className={`bg-green-600 py-4 rounded-xl mb-4 flex-row justify-center ${
+                loading ? 'opacity-50' : ''
+              }`}
+              onPress={handleRegister}
+              disabled={loading}
             >
-              <Text className="text-center text-white font-bold text-base">
-                {otpSent ? '✅ Verify OTP' : '📨 Send OTP'}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-center text-white font-bold text-base">Register</Text>
+              )}
             </TouchableOpacity>
           </View>
 
