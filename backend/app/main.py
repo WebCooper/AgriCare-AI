@@ -4,6 +4,7 @@ from app.auth import router as auth_router
 from app.core.config import get_settings
 from app.ml import router as ml_router
 from app.chatbot import router as chatbot_router
+from app.core.health import health_router
 
 settings = get_settings()
 
@@ -32,3 +33,4 @@ async def health_check():
 app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
 app.include_router(ml_router.router, prefix="/ml", tags=["ML"])
 app.include_router(chatbot_router.router, prefix="/chatbot", tags=["Chatbot"])
+app.include_router(health_router)
