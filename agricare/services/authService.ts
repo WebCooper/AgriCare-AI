@@ -19,6 +19,13 @@ interface AuthResponse {
   expires_in: number;
 }
 
+interface UserInfo {
+  id: number;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 // Authentication utility functions
 const authService = {
   /**
@@ -185,6 +192,27 @@ const authService = {
       // If refresh fails, logout the user
       await authService.logout();
       return null;
+    }
+  },
+  
+  /**
+   * Get the current user information
+   * @returns User information or null if not authenticated
+   */
+  getUserInfo: async () => {
+    try {
+      // Check if we have an access token
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        return null;
+      }
+      
+      // Get user information from the API
+      const response = await api.get<UserInfo>('/auth/me');
+      return response.data;
+    } catch (error) {
+      console.error('Get user info error:', error);
+      throw error;
     }
   },
 };

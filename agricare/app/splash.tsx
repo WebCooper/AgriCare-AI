@@ -34,8 +34,10 @@ export default function SplashScreen() {
       })
     ).start();
 
-    // Navigate to onboarding/login after splash delay
+    // Navigate after splash delay - Auth logic is now handled by AuthCheck in _layout.tsx
     const timeout = setTimeout(() => {
+      // The routing will be handled by the AuthCheck component
+      // This navigation will be intercepted if the user is already authenticated
       router.replace('/(onboarding)/intro1');
     }, 3500);
 
