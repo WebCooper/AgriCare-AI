@@ -15,5 +15,7 @@ tensorflow
 keras
 pydantic-settings
 pydantic[email]
+google-generativeai
+python-multipart
 
 
