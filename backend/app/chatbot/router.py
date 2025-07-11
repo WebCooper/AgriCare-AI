@@ -46,6 +46,9 @@ async def chat_with_bot(
             raise HTTPException(status_code=404, detail="Conversation not found")
         
         conversation_history = get_conversation_history(db, conversation_id)
+        # Enforce max 5 messages per conversation
+        if len(conversation_history) >= 5:
+            raise HTTPException(status_code=400, detail="Maximum number of messages (5) reached for this conversation.")
     else:
         # Create new conversation
         conversation = create_conversation(db, current_user.id, "general")
@@ -85,6 +88,9 @@ async def chat_prediction(
             raise HTTPException(status_code=404, detail="Conversation not found")
         
         conversation_history = get_conversation_history(db, conversation_id)
+        # Enforce max 5 messages per conversation
+        if len(conversation_history) >= 5:
+            raise HTTPException(status_code=400, detail="Maximum number of messages (5) reached for this conversation.")
     else:
         # Create new prediction conversation
         conversation = create_conversation(

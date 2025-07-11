@@ -8,7 +8,11 @@ The system now supports two types of conversations:
 1. **General Chat** (`/chatbot/chat`) - For general farming questions and advice
 2. **Prediction Chat** (`/chatbot/chat/prediction`) - For disease-specific conversations
 
-Both endpoints maintain conversation history and allow users to continue conversations naturally.
+**Limits:**
+- Each chatbot response is limited to a single paragraph (max 3 sentences).
+- Each conversation can have a maximum of 5 messages (user+assistant combined). Once this limit is reached, no further messages can be sent in that conversation.
+
+Both endpoints maintain conversation history and allow users to continue conversations naturally, within these limits.
 
 ## Authentication
 
@@ -53,6 +57,10 @@ Authorization: Bearer your_jwt_token_here
   "conversation_id": 123
 }
 ```
+
+**Limits:**
+- Each conversation can have a maximum of 5 messages (user+assistant combined). If you try to send a message after this limit, you will receive a 400 error.
+- Each response will be a single paragraph (max 3 sentences).
 
 ### Example Conversation Flow
 
@@ -100,11 +108,15 @@ Authorization: Bearer your_jwt_token_here
 }
 ```
 
+**Limits:**
+- Each conversation can have a maximum of 5 messages (user+assistant combined). If you try to send a message after this limit, you will receive a 400 error.
+- Each response will be a single paragraph (max 3 sentences).
+
 ### Example Prediction Conversation Flow
 
 1. **Initial prediction** (crop + disease) → Creates new prediction conversation
 2. **Follow-up question** (with conversation_id + follow_up_message) → Continues disease-specific conversation
-3. **More questions** (same conversation_id) → Maintains context about the specific disease
+3. **More questions** (same conversation_id) → Maintains context about the specific disease (up to 5 messages total)
 
 ## 3. Conversation Management Endpoints
 
@@ -156,7 +168,7 @@ Authorization: Bearer your_jwt_token_here
 ## Key Features
 
 ### 1. Conversation Memory
-- Each conversation maintains a complete history of all messages
+- Each conversation maintains a complete history of all messages (up to 5 messages per conversation)
 - The AI remembers previous context and can refer back to earlier parts of the conversation
 - Conversations are tied to specific users
 
@@ -165,13 +177,17 @@ Authorization: Bearer your_jwt_token_here
 - **Prediction**: Specifically for disease-related conversations with crop and disease context
 
 ### 3. Automatic Context Building
-- The AI automatically includes relevant conversation history in its responses
+- The AI automatically includes relevant conversation history in its responses (up to the 5-message limit)
 - No need to manually manage context - the system handles it automatically
 
 ### 4. User-Specific Conversations
 - Each user can have multiple conversations
 - Conversations are isolated per user
 - Users can only access their own conversations
+
+### 5. Response and Message Limits
+- Each chatbot response is limited to a single paragraph (max 3 sentences)
+- Each conversation can have a maximum of 5 messages (user+assistant combined)
 
 ## Usage Examples
 
@@ -221,6 +237,11 @@ curl -X POST "http://localhost:8000/chatbot/chat/prediction" \
 {"detail": "Conversation not found"}
 ```
 
+**400 Bad Request (Message Limit Exceeded):**
+```json
+{"detail": "Maximum number of messages (5) reached for this conversation."}
+```
+
 **422 Validation Error:**
 ```json
 {"detail": "Validation error - missing required fields"}
@@ -233,6 +254,7 @@ curl -X POST "http://localhost:8000/chatbot/chat/prediction" \
 3. **Don't mix conversation types** - use prediction endpoint for disease-specific questions
 4. **Handle errors gracefully** - check for 404 when conversation_id is invalid
 5. **Keep conversations focused** - start new conversations for different topics
+6. **Be aware of the 5-message limit per conversation and the single-paragraph response limit**
 
 ## Testing
 

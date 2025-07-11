@@ -2,6 +2,15 @@ from typing import List, Optional
 from app.db.models import Conversation, Message
 from sqlalchemy.orm import Session
 
+def _truncate_to_one_paragraph(text: str) -> str:
+    # Truncate at first double line break or after 3 sentences
+    import re
+    # Try to split at double line break
+    para = text.split("\n\n", 1)[0].strip()
+    # If still too long, split into sentences
+    sentences = re.split(r'(?<=[.!?]) +', para)
+    return ' '.join(sentences[:3]).strip()
+
 def generate_crop_disease_response(disease, crop, model, conversation_history: Optional[List[dict]] = None):
     if conversation_history:
         # Build conversation context from history
@@ -15,24 +24,24 @@ def generate_crop_disease_response(disease, crop, model, conversation_history: O
 Continue the conversation about {disease} in {crop}. The user is asking a follow-up question.
 Please provide a helpful, supportive response that builds on the previous conversation.
 Keep the tone clear, supportive, and practical for a rural farmer.
+Limit your response to a single paragraph (max 3 sentences).
 """
     else:
         prompt = f"""
 You are an agriculture expert chatbot helping a rural farmer.
 The AI system has detected "{disease}" in their "{crop}" plant.
 
-Please give a detailed but simple response in 5 parts:
-1. What the disease is (simple explanation)
-2. How to recognize symptoms (visually)
-3. Organic and chemical treatments
-4. Preventive actions for future
-5. Friendly message in local context (short)
+Please give a simple response in one paragraph (max 3 sentences):
+- What the disease is (simple explanation)
+- How to recognize symptoms (visually)
+- Organic and chemical treatments or preventive actions
+- Friendly message in local context (short)
 
 Keep the tone clear, supportive, and practical.
 """
     
     response = model.generate_content(prompt)
-    return response.text
+    return _truncate_to_one_paragraph(response.text)
 
 def generate_general_chat_response(message: str, model, conversation_history: Optional[List[dict]] = None):
     if conversation_history:
@@ -49,7 +58,7 @@ User: {message}
 You are an agriculture expert chatbot helping rural farmers. Continue the conversation naturally and helpfully.
 Provide practical, supportive advice related to farming, crops, weather, or any agricultural concerns.
 Keep responses clear, friendly, and actionable for rural farmers.
-"""
+Limit your response to a single paragraph (max 3 sentences)."""
     else:
         prompt = f"""
 You are an agriculture expert chatbot helping rural farmers.
@@ -58,10 +67,10 @@ User: {message}
 
 Provide practical, supportive advice related to farming, crops, weather, or any agricultural concerns.
 Keep responses clear, friendly, and actionable for rural farmers.
-"""
+Limit your response to a single paragraph (max 3 sentences)."""
     
     response = model.generate_content(prompt)
-    return response.text
+    return _truncate_to_one_paragraph(response.text)
 
 def get_conversation_history(db: Session, conversation_id: int) -> List[dict]:
     """Get conversation history as a list of message dictionaries"""
