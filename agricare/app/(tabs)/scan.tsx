@@ -8,16 +8,20 @@ import {
   PredictionResponse, 
   savePredictionToHistory, 
   getPredictionHistory,
-  PredictionHistory
+  PredictionHistory,
+  startPredictionChat,
+  linkPredictionWithConversation
 } from '@/services/predictionService';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ScrollView, Alert, View, Text, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraViewRef } from '@/components/scan/CameraView';
+import { useRouter } from 'expo-router';
 
 
 export default function ScanScreen() {
+  const router = useRouter();
   const [selectedCrop, setSelectedCrop] = useState('tomato');
   const [imageUri, setImageUri] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -142,6 +146,38 @@ export default function ScanScreen() {
     setError(null);
   };
 
+  const handleStartChat = async (crop: string, disease: string) => {
+    try {
+      // Start a new prediction-specific chat
+      const chatResponse = await startPredictionChat(crop, disease);
+      
+      // If this was from a saved prediction, link the conversation
+      if (selectedPrediction) {
+        await linkPredictionWithConversation(
+          selectedPrediction.id,
+          chatResponse.conversation_id
+        );
+        
+        // Refresh prediction history to update the link
+        await loadPredictionHistory();
+      }
+      
+      // Navigate to prediction chat screen
+      router.push({
+        pathname: '/prediction-chat/[id]',
+        params: {
+          id: 'chat',
+          crop,
+          disease,
+          imageUri
+        }
+      });
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      Alert.alert('Error', 'Failed to start chat. Please try again.');
+    }
+  };
+
   return (
     <ScrollView 
       className="flex-1 bg-gray-50"
@@ -169,6 +205,8 @@ export default function ScanScreen() {
                 prediction={prediction} 
                 isLoading={isAnalyzing}
                 error={error}
+                cropType={selectedCrop}
+                onStartChat={handleStartChat}
               />
             </View>
           </>

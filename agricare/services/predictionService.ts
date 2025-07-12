@@ -12,6 +12,19 @@ export interface PredictionHistory extends PredictionResponse {
   imageUri: string;
   cropType: string;
   timestamp: number;
+  conversation_id?: number; // To link predictions with their chat conversations
+}
+
+interface PredictionChatRequest {
+  crop: string;
+  disease: string;
+  conversation_id?: number;
+  follow_up_message?: string;
+}
+
+interface ChatResponse {
+  response: string;
+  conversation_id: number;
 }
 
 const PREDICTION_HISTORY_KEY = 'agricare_prediction_history';
@@ -111,5 +124,83 @@ export const clearPredictionHistory = async (): Promise<void> => {
     await AsyncStorage.removeItem(PREDICTION_HISTORY_KEY);
   } catch (error) {
     console.error('Error clearing prediction history:', error);
+  }
+};
+
+/**
+ * Start a disease-specific chat conversation based on a prediction
+ * @param crop The type of crop
+ * @param disease The predicted disease
+ * @returns Chat response with conversation ID
+ */
+export const startPredictionChat = async (
+  crop: string,
+  disease: string
+): Promise<ChatResponse> => {
+  try {
+    const payload: PredictionChatRequest = {
+      crop,
+      disease
+    };
+
+    const response = await axios.post('/chatbot/chat/prediction', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error starting prediction chat:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send a follow-up question in a disease-specific chat conversation
+ * @param crop The type of crop
+ * @param disease The predicted disease
+ * @param followUpMessage The follow-up question
+ * @param conversationId The ID of the existing conversation
+ * @returns Chat response
+ */
+export const sendPredictionChatFollowUp = async (
+  crop: string,
+  disease: string,
+  followUpMessage: string,
+  conversationId: number
+): Promise<ChatResponse> => {
+  try {
+    const payload: PredictionChatRequest = {
+      crop,
+      disease,
+      conversation_id: conversationId,
+      follow_up_message: followUpMessage
+    };
+
+    const response = await axios.post('/chatbot/chat/prediction', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error sending follow-up question:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update a prediction history item with its associated chat conversation ID
+ * @param predictionId The ID of the prediction
+ * @param conversationId The ID of the chat conversation
+ */
+export const linkPredictionWithConversation = async (
+  predictionId: string,
+  conversationId: number
+): Promise<void> => {
+  try {
+    const history = await getPredictionHistory();
+    const updatedHistory = history.map(item => 
+      item.id === predictionId 
+        ? { ...item, conversation_id: conversationId }
+        : item
+    );
+    
+    await AsyncStorage.setItem(PREDICTION_HISTORY_KEY, JSON.stringify(updatedHistory));
+  } catch (error) {
+    console.error('Error linking prediction with conversation:', error);
+    throw error;
   }
 };

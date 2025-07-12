@@ -1,18 +1,26 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { PredictionResponse } from '@/services/predictionService';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 interface PredictionResultProps {
   prediction: PredictionResponse | null;
   isLoading: boolean;
   error: string | null;
+  cropType: string;
+  onStartChat?: (crop: string, disease: string) => Promise<void>;
 }
 
 export default function PredictionResult({ 
   prediction, 
   isLoading, 
-  error 
+  error,
+  cropType,
+  onStartChat 
 }: PredictionResultProps) {
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const router = useRouter();
   
   if (isLoading) {
     return (
@@ -89,6 +97,34 @@ export default function PredictionResult({
               : 'Low confidence in this diagnosis. Consider retaking the image.'}
         </Text>
       </View>
+
+      {/* Ask AI Button */}
+      <TouchableOpacity
+        onPress={async () => {
+          if (!onStartChat) return;
+          try {
+            setIsChatLoading(true);
+            await onStartChat(cropType, prediction.predicted_class);
+          } catch (error) {
+            console.error('Error starting chat:', error);
+          } finally {
+            setIsChatLoading(false);
+          }
+        }}
+        disabled={isChatLoading}
+        className="flex-row items-center justify-center bg-green-600 px-4 py-3 rounded-lg mt-4"
+      >
+        {isChatLoading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <>
+            <Ionicons name="chatbubble-outline" size={20} color="white" />
+            <Text className="text-white font-medium ml-2">
+              Ask AI about this disease
+            </Text>
+          </>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }

@@ -3,22 +3,25 @@ import ChatHistoryCard from '@/components/history/ChatHistoryCard';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import chatbotService from '@/services/chatbotService';
+import { getAllConversations } from '@/services/chatHistoryService';
 import { format } from 'date-fns';
 
 // Define our types
+type Message = {
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+};
+
 type Conversation = {
   id: number;
   conversation_type: 'general' | 'prediction';
-  crop: string | null;
-  disease: string | null;
+  crop: string | undefined | null;
+  disease: string | undefined | null;
   created_at: string;
   updated_at: string;
-  messages: {
-    role: 'user' | 'assistant';
-    content: string;
-    created_at: string;
-  }[];
+  imageUrl?: string;
+  messages: Message[];
 };
 
 export default function HistoryScreen() {
@@ -37,8 +40,15 @@ export default function HistoryScreen() {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const data = await chatbotService.getConversations();
-      setConversations(data);
+      // Get all conversations from local storage
+      const localData = await getAllConversations();
+      
+      // Sort conversations by date
+      const allConversations = localData.sort(
+        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      ) as Conversation[];
+
+      setConversations(allConversations);
       setError('');
     } catch (err) {
       console.error('Failed to fetch conversations:', err);
@@ -60,13 +70,28 @@ export default function HistoryScreen() {
   const predictionChats = conversations.filter(conv => conv.conversation_type === 'prediction');
 
   // Navigate to conversation detail
-  const viewConversation = (id: number) => {
-    router.push({ pathname: "/report/[id]", params: { id: id.toString(), type: 'conversation' } });
+  const viewConversation = (chat: Conversation) => {
+    // For general chats, navigate to chatbot tab with history param
+    router.push({
+      pathname: "/(tabs)/chatbot",
+      params: {
+        chatId: chat.id.toString(),
+        type: 'history'
+      }
+    });
   };
 
   // Navigate to disease prediction report
-  const viewReport = (id: number) => {
-    router.push({ pathname: "/report/[id]", params: { id: id.toString(), type: 'prediction' } });
+  const viewReport = (report: Conversation) => {
+    router.push({
+      pathname: "/prediction-chat/[id]",
+      params: {
+        id: report.id.toString(),
+        crop: report.crop || '',
+        disease: report.disease || '',
+        imageUri: report.imageUrl
+      }
+    });
   };
 
   // Format the first message to use as a preview
@@ -155,7 +180,7 @@ export default function HistoryScreen() {
                   date={chat.created_at}
                   snippet={getMessageSnippet(chat.messages)}
                   conversationType="general"
-                  onPress={() => viewConversation(chat.id)}
+                  onPress={() => viewConversation(chat)}
                 />
               ))
             )}
@@ -173,7 +198,8 @@ export default function HistoryScreen() {
                   crop={report.crop || 'Unknown crop'}
                   date={format(new Date(report.created_at), 'yyyy-MM-dd')}
                   disease={report.disease || 'Unknown disease'}
-                  onPress={() => viewReport(report.id)}
+
+                  onPress={() => viewReport(report)}
                 />
               ))
             )}

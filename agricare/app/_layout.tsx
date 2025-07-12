@@ -110,6 +110,18 @@ export default function RootLayout() {
         headerShown: false,
       }}
     />
+        <Stack.Screen
+      name="prediction-chat/[id]"
+      options={{
+        headerShown: false,
+      }}
+    />
+            <Stack.Screen
+      name="report/[id]"
+      options={{
+        headerShown: false,
+      }}
+    />
  
       </Stack>
     </AuthCheck>
