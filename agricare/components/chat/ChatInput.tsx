@@ -25,7 +25,7 @@ export default function ChatInput({
   };
 
   return (
-    <View className="px-4 py-3 bg-white border-t border-gray-200">
+    <View className="px-4 py-2 bg-white border-t border-gray-200 absolute bottom-0 left-0 right-0">
       <View className="flex-row items-center relative">
         <TextInput
           className={`flex-1 min-h-[44px] px-4 pr-12 py-2 rounded-full ${
@@ -43,7 +43,7 @@ export default function ChatInput({
           onPress={handleSend} 
           disabled={isLoading || !text.trim() || disabled}
           className={`absolute right-1 p-2 rounded-full ${
-            isLoading || !text.trim() || disabled ? 'bg-gray-300' : 'bg-green-600'
+            isLoading || disabled ? 'bg-gray-300' : text.trim() ? 'bg-green-600' : 'bg-gray-400'
           }`}
         >
           {isLoading ? (

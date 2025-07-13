@@ -83,15 +83,29 @@ export default function HistoryScreen() {
 
   // Navigate to disease prediction report
   const viewReport = (report: Conversation) => {
-    router.push({
-      pathname: "/prediction-chat/[id]",
-      params: {
-        id: report.id.toString(),
-        crop: report.crop || '',
-        disease: report.disease || '',
-        imageUri: report.imageUrl
+    try {
+      // Log full conversation details for debugging
+      console.log('Full report details:', JSON.stringify(report, null, 2));
+      console.log('Original imageUrl:', report.imageUrl);
+
+      // Check if image exists
+      if (report.imageUrl) {
+        console.log('Image URL type:', typeof report.imageUrl);
+        console.log('Image URL length:', report.imageUrl.length);
       }
-    });
+
+      router.push({
+        pathname: "/prediction-chat/[id]",
+        params: {
+          id: report.id.toString(),
+          crop: report.crop || '',
+          disease: report.disease || '',
+          imageUri: report.imageUrl // Pass the original URI without modification
+        }
+      });
+    } catch (error) {
+      console.error('Error formatting image URI:', error);
+    }
   };
 
   // Format the first message to use as a preview

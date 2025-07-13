@@ -22,7 +22,6 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  imageUri?: string;
 }
 
 interface SavedConversation {
@@ -31,7 +30,6 @@ interface SavedConversation {
   disease: string;
   messages: Message[];
   lastUpdated: string;
-  imageUri?: string;
 }
 
 export default function PredictionChatScreen() {
@@ -40,10 +38,8 @@ export default function PredictionChatScreen() {
     crop: string;
     disease: string;
     id: string;
-    imageUri?: string;
   }>();
-  const { crop, disease, imageUri } = params;
-  
+  const { crop, disease } = params;
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<number | undefined>(undefined);
@@ -73,8 +69,7 @@ export default function PredictionChatScreen() {
         crop: crop as string,
         disease: disease as string,
         messages,
-        lastUpdated: new Date().toISOString(),
-        imageUri
+        lastUpdated: new Date().toISOString()
       };
 
       // Get existing conversations
@@ -110,8 +105,7 @@ export default function PredictionChatScreen() {
         id: Date.now().toString(),
         text: `I found signs of ${formattedDisease} in my ${crop} plant. Can you help me understand more about this disease and how to treat it?`,
         sender: 'user',
-        timestamp: new Date(),
-        imageUri: imageUri,
+        timestamp: new Date()
       };
       
       // Format message for storage compatibility
@@ -199,8 +193,9 @@ export default function PredictionChatScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-gray-50"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 40}
+      style={{ flex: 1 }}
     >
       {/* Header */}
       <View className="bg-white border-b border-gray-200">
@@ -233,21 +228,13 @@ export default function PredictionChatScreen() {
       <ScrollView 
         ref={scrollViewRef}
         className="flex-1 px-4 pt-4"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 150 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Chat messages */}
         {messages.map(msg => (
           <View key={msg.id} className="mb-4">
-            {msg.imageUri && msg.sender === 'user' && (
-              <View className="ml-auto mb-2 mr-2">
-                <Image 
-                  source={{ uri: msg.imageUri }} 
-                  className="w-48 h-48 rounded-lg"
-                  resizeMode="cover"
-                />
-              </View>
-            )}
             <ChatMessage 
               message={msg.text} 
               sender={msg.sender}

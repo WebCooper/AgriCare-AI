@@ -9,7 +9,7 @@ export interface PredictionResponse {
 
 export interface PredictionHistory extends PredictionResponse {
   id: string;
-  imageUri: string;
+  imageUri: string; // Will be empty string - images not stored for history
   cropType: string;
   timestamp: number;
   conversation_id?: number; // To link predictions with their chat conversations
@@ -76,11 +76,11 @@ export const savePredictionToHistory = async (
     // Get existing predictions from storage
     const existingHistory = await getPredictionHistory();
     
-    // Create a new history item
+    // Create a new history item without image
     const historyItem: PredictionHistory = {
       ...prediction,
       id: Date.now().toString(),
-      imageUri,
+      imageUri: '', // No image stored
       cropType,
       timestamp: Date.now()
     };

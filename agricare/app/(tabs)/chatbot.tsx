@@ -202,8 +202,9 @@ export default function ChatbotScreen({ route }: ChatbotScreenProps) {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-gray-50"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 40}
+      style={{ flex: 1 }}
     >
       {/* Header */}
       <View className="flex-row justify-between items-center px-4 py-2 bg-white border-b border-gray-200">
@@ -228,8 +229,9 @@ export default function ChatbotScreen({ route }: ChatbotScreenProps) {
       <ScrollView 
         ref={scrollViewRef}
         className="flex-1 px-4 pt-4"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 180 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={loadPreviousConversation} />
         }
