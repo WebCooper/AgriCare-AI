@@ -6,7 +6,7 @@ This guide explains how to use the new chat endpoints that support conversation 
 
 The system now supports two types of conversations:
 1. **General Chat** (`/chatbot/chat`) - For general farming questions and advice
-2. **Prediction Chat** (`/chatbot/chat/prediction`) - For disease-specific conversations
+2. **Prediction Chat** (`/chatbot/chat/prediction`) - For disease-specific conversation
 
 **Limits:**
 - Each chatbot response is limited to a single paragraph (max 3 sentences).
